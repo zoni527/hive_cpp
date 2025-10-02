@@ -1,0 +1,36 @@
+[
+ {
+  "directory": "/home/jvarila/Repos/hive_cpp/cpp09/ex00",
+  "arguments": [
+   "c++",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-std=c++20",
+   "-I",
+   "./inc",
+   "-c",
+   "src/BitcoinExchange.cpp",
+   "-o",
+   "obj/BitcoinExchange.o"
+  ],
+  "file": "src/BitcoinExchange.cpp"
+ },
+ {
+  "directory": "/home/jvarila/Repos/hive_cpp/cpp09/ex00",
+  "arguments": [
+   "c++",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-std=c++20",
+   "-I",
+   "./inc",
+   "-c",
+   "src/main.cpp",
+   "-o",
+   "obj/main.o"
+  ],
+  "file": "src/main.cpp"
+ }
+]

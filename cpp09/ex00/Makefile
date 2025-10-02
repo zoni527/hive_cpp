@@ -13,7 +13,7 @@
 NAME		:= btc
 
 CXX			:= c++
-CXX_FLAGS	:= -Wall -Wextra -Werror -std=c++17
+CXX_FLAGS	:= -Wall -Wextra -Werror -std=c++20
 DEBUG_FLAGS	:= -g
 # ---------------------------------------------------------------------------- #
 INC_DIR		:= ./inc

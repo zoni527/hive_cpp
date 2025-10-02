@@ -25,10 +25,12 @@ public:
 
 	BitcoinExchange	&operator=( BitcoinExchange const &rhs ) = delete;
 
-	void	run()				const;
-	void	printDataFile()		const;
-	void	printInputFile()	const;
+	void	run();
+
 private:
-	std::string const _dataFileName;
-	std::string const _inputFileName;
+	std::string const	_dataFileName;
+	std::string const	_inputFileName;
+
+	bool	dataParseSuccessful();
+	bool	inputParseSuccessful();
 };
