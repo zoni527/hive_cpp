@@ -6,7 +6,7 @@
 /*   By: jvarila <jvarila@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/30 17:11:02 by jvarila           #+#    #+#             */
-/*   Updated: 2025/10/03 17:44:41 by jvarila          ###   ########.fr       */
+/*   Updated: 2025/10/03 17:36:47 by jvarila          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ static bool	dateIsValid(	std::smatch const	&match,
 							std::string const	&fileType,
 							size_t				lineCounter );
 
-static bool	floatValueOverflows(	std::smatch const	&match,
+static bool	bitcoinValueOverflows(	std::smatch const	&match,
 									std::string const	&fileType,
 									size_t				lineCounter );
 
@@ -101,10 +101,10 @@ bool	BitcoinExchange:: dataParseSuccessful()
 		if ( !dateIsValid( match, "Data file", lineCounter ) )
 			continue;
 
-		if ( !floatValueOverflows( match, "Data file", lineCounter ) )
+		if ( !bitcoinValueOverflows( match, "Data file", lineCounter ) )
 			_data[ match[1] ] = std::stof( match[5] );
 	}
-
+	
 	return true;
 }
 
@@ -149,12 +149,10 @@ bool	BitcoinExchange:: inputParseSuccessful()
 		if ( !dateIsValid( match, "Input file", lineCounter ) )
 			continue;
 
-		if ( floatValueOverflows( match, "Input file", lineCounter ) )
+		if ( bitcoinValueOverflows( match, "Input file", lineCounter ) )
 			continue;
 
 		float	value = std::stof( match[5] );
-
-		// Bitcoin ownership limits
 
 		if ( value < 0 )
 		{
@@ -173,7 +171,7 @@ bool	BitcoinExchange:: inputParseSuccessful()
 		}
 
 		std::string	closestDate = std::string( 10, 0 );
-
+		
 		for ( auto &d : _data )
 		{
 			if ( d.first < match[1] && d.first > closestDate )
@@ -246,7 +244,7 @@ static bool	dateIsValid(	std::smatch const	&match,
 	return true;
 }
 
-static bool	floatValueOverflows(	std::smatch const	&match,
+static bool	bitcoinValueOverflows(	std::smatch const	&match,
 									std::string const	&fileType,
 									size_t				lineCounter )
 {
@@ -258,7 +256,7 @@ static bool	floatValueOverflows(	std::smatch const	&match,
 	{
 		std::cout
 			<< RED "Error:" RST " " << fileType << ": line " << lineCounter
-			<< ": value " << RHL << match[5] << RST
+			<< ": bitcoin value " << RHL << match[5] << RST
 			<< " is invalid.\n";
 		return true;
 	}
