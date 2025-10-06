@@ -6,23 +6,23 @@
 #    By: jvarila <jvarila@student.hive.fi>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/05/22 12:04:28 by jvarila           #+#    #+#              #
-#    Updated: 2025/09/30 17:54:45 by jvarila          ###   ########.fr        #
+#    Updated: 2025/10/06 11:21:30 by jvarila          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME		:= btc
+NAME		:= RPN
 
 CXX			:= c++
-CXX_FLAGS	:= -Wall -Wextra -Werror -std=c++20
+CXX_FLAGS	:= -Wall -Wextra -Werror -std=c++17
 DEBUG_FLAGS	:= -g
 # ---------------------------------------------------------------------------- #
-INC_DIR		:= ./inc
-HEADERS		:=	$(INC_DIR)/BitcoinExchange.hpp
+INC_DIR		:= .
+HEADERS		:=
 # ---------------------------------------------------------------------------- #
 SRC_DIR	:=	./src
 OBJ_DIR	:=	./obj
 # ---------------------------------------------------------------------------- #
-SRC :=	$(SRC_DIR)/BitcoinExchange.cpp	\
+SRC :=	$(SRC_DIR)/RPN.cpp	\
 		$(SRC_DIR)/main.cpp
 # ---------------------------------------------------------------------------- #
 OBJ :=	$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC))
@@ -46,14 +46,11 @@ fclean: clean
 
 re: fclean all
 
-run: all
-	./$(NAME)
-
 gdb: debug
 	gdb -tui $(NAME)
 # ---------------------------------------------------------------------------- #
 debug: CXX_FLAGS += $(DEBUG_FLAGS)
 debug: fclean all
 # ---------------------------------------------------------------------------- #
-.PHONY: all clean fclean re debug run gdb
+.PHONY: all clean fclean re debug gdb
 # ---------------------------------------------------------------------------- #
