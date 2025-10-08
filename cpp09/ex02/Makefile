@@ -48,11 +48,11 @@ re: fclean all
 run: $(NAME)
 	./$(NAME)
 
-gdb: debug
+gdb: $(NAME)
 	gdb -tui $(NAME)
 # ---------------------------------------------------------------------------- #
 debug: CXX_FLAGS += $(DEBUG_FLAGS)
 debug: fclean all
 # ---------------------------------------------------------------------------- #
-.PHONY: all clean fclean re debug gdb run
+.PHONY: all clean fclean re debug run gdb
 # ---------------------------------------------------------------------------- #

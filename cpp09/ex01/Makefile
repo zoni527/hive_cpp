@@ -46,11 +46,14 @@ fclean: clean
 
 re: fclean all
 
-gdb: debug
+run: $(NAME)
+	./$(NAME) "1 2 + 3 4 * - 1 /"
+
+gdb: $(NAME)
 	gdb -tui $(NAME)
 # ---------------------------------------------------------------------------- #
 debug: CXX_FLAGS += $(DEBUG_FLAGS)
 debug: fclean all
 # ---------------------------------------------------------------------------- #
-.PHONY: all clean fclean re debug gdb
+.PHONY: all clean fclean re debug run gdb
 # ---------------------------------------------------------------------------- #

@@ -46,10 +46,10 @@ fclean: clean
 
 re: fclean all
 
-run: all
-	./$(NAME)
+run: $(NAME)
+	./$(NAME) input.txt
 
-gdb: debug
+gdb: $(NAME)
 	gdb -tui $(NAME)
 # ---------------------------------------------------------------------------- #
 debug: CXX_FLAGS += $(DEBUG_FLAGS)
