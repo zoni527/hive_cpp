@@ -17,6 +17,6 @@ int	main()
 {
 	std::vector<int>	numbers = {7, 3, 6, 4, 1, 2, 5, 9, 8, 9, 1};
 
-	merge_insertion_sort< std::vector<int>, std::vector<int> >(numbers);
+	merge_insertion_sort_vec<std::vector<int>>(numbers);
 	return 0;
 }
