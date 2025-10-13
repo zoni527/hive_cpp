@@ -6,7 +6,7 @@
 #    By: jvarila <jvarila@student.hive.fi>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/05/22 12:04:28 by jvarila           #+#    #+#              #
-#    Updated: 2025/10/07 11:36:04 by jvarila          ###   ########.fr        #
+#    Updated: 2025/10/13 16:48:23 by jvarila          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,8 @@ HEADERS		:= $(INC_DIR)/PmergeMe.hpp
 SRC_DIR	:=	./src
 OBJ_DIR	:=	./obj
 # ---------------------------------------------------------------------------- #
-SRC :=	$(SRC_DIR)/main.cpp
+SRC :=	$(SRC_DIR)/PmergeMe.cpp	\
+		$(SRC_DIR)/main.cpp
 # ---------------------------------------------------------------------------- #
 OBJ :=	$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC))
 
