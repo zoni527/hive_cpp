@@ -14,17 +14,15 @@
 #include <unordered_map>
 #include <algorithm>
 
+/* -------------------------------------------------------------------------- */
+
 constexpr uint8_t	RECURSION_OFFSET = 5;
 
-void	print_chain( std::string const &name,
+static void	print_chain( std::string const &name,
 				 std::string const &indent,
-				 std::vector<int const *> vec)
-{
-	std::cout << indent << name << ":\n" << indent;
-	for (auto const &e : vec)
-		std::cout << *e << " ";
-	std::cout << std::endl;
-}
+				 std::vector<int const *> vec);
+
+/* -------------------------------------------------------------------------- */
 
 std::vector<int const *>
 &vec_pointers_recursion_sort(std::vector<int const *> &source_chain)
@@ -34,13 +32,15 @@ std::vector<int const *>
 
 	++recursion_level;
 	std::string	indent(recursion_level * RECURSION_OFFSET, ' ');
-	std::cout << indent << "//////////////////////////////////\n";
+	std::string	opening_separator(C_B_HI_Y "//////////////////////////////////\n" C_RST);
+	std::string	closing_separator(C_B_HI_G R"(\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\)" C_RST);
+	std::cout << indent << opening_separator;
 	print_chain("Source chain", indent, source_chain);
 #endif
 
 	if (source_chain.size() <= 1) {
 #ifdef DEBUG
-		std::cout << indent << R"(\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\)" << "\n";
+		std::cout << indent << closing_separator << "\n";
 #endif
 		return source_chain;
 	}
@@ -87,6 +87,12 @@ std::vector<int const *>
 
 #ifdef DEBUG
 	print_chain("Main chain (unsorted)", indent, main_chain);
+	std::cout << indent << "Pend chain (unsorted):\n" << indent;
+	for (auto const &e : main_chain)
+		std::cout << *pair_map[e] << " ";
+	if (not_even)
+		std::cout << *straggler;
+	std::cout << "\n";
 #endif
 
 	vec_pointers_recursion_sort(main_chain);
@@ -102,7 +108,7 @@ std::vector<int const *>
 		pend_chain.push_back(straggler);
 
 #ifdef DEBUG
-	std::cout << indent << "Pend chain:\n";
+	std::cout << indent << "Pend chain (matching main order):\n";
 	std::cout << indent;
 	for (auto iptr : pend_chain)
 		std::cout << *iptr << " ";
@@ -116,12 +122,15 @@ std::vector<int const *>
 #endif
 
 	using It = decltype(main_chain.begin());
-	size_t	insertions			= 1;		// b1 was already inserted
-	size_t	previous_jacobstahl	= 1;		// b1 insertion corresponds to Jacobstahl 1
-	size_t	current_jacobstahl	= 3;		// Continue to b3 and b2
-	size_t	element_idx			= 0;
-	size_t	elements_to_insert	= 0;
-	It		upper_limit			= main_chain.begin() + insertions * 2;
+	size_t		insertions			= 1;		// b1 was already inserted
+	size_t		previous_jacobstahl	= 1;		// b1 insertion corresponds to Jacobstahl 1
+	size_t		current_jacobstahl	= 3;		// Continue to b3 and b2
+	size_t		element_idx			= 0;
+	size_t		elements_to_insert	= 0;
+	size_t		offset				= 0;
+	It			upper_limit			= main_chain.begin();
+	It			pos					= main_chain.begin();
+	int const	*element			= nullptr;
 
 	while (insertions < pend_chain.size()) {	// Insert while there are uninserted elements in the pend chain
 
@@ -137,32 +146,30 @@ std::vector<int const *>
 			element_idx			= pend_chain.size() - 1;
 		}
 
-#ifdef DEBUG
-		std::cout << indent << "Inserting " << elements_to_insert << " elements" << "\n";
-#endif
+		offset = insertions + element_idx;
+		upper_limit = main_chain.begin() + offset - 1;
 
 		size_t	count = 0;
 		while (count++ < elements_to_insert) {
 
 #ifdef DEBUG
-		std::cout << indent << "Pend chain element index: " << element_idx << "\n";
-		std::cout << indent << "Limiting element in main chain: " << **upper_limit << "\n";
-		std::cout
-				<< indent << "Limiting element in main chain index : "
-				<< std::distance(main_chain.begin(), upper_limit) << "\n";
+		std::cout << indent
+				<< "Limiting element in main chain:	Index: "
+				<< std::distance(main_chain.begin(), upper_limit)
+				<< "	Value: " << **upper_limit << "\n";
 #endif
 
-			int const	*element = pend_chain[element_idx--];
-			auto		pos = std::upper_bound(main_chain.begin(), upper_limit, element,
-								[](int const *val, int const *elem)
-								{
-									return (*val < *elem);
-								});
+			element		= pend_chain[element_idx--];
+			pos = std::upper_bound(main_chain.begin(), upper_limit, element,
+							[](int const *val, int const *elem)
+							{
+								return (*val < *elem);
+							});
 
 #ifdef DEBUG
 			std::cout
-				<< indent << "Inserting " << *element << " before " 
-				<< *(*pos) << "\n";
+				<< indent << "Inserting b" << element_idx + 2
+				<< " = " << *element << "\n";
 #endif
 
 			main_chain.insert(pos, element);
@@ -172,7 +179,9 @@ std::vector<int const *>
 #endif
 
 			++insertions;
-			upper_limit = main_chain.begin() + insertions * 2 - count;
+			// insertions * 2 -> inserted b1 and b2 -> skip b1, b2, a1 and a2 -> land on a3
+			std::cout << "Offset : " << offset << "\n";
+			upper_limit = main_chain.begin() + offset - 1;
 		}
 
 		size_t	temp = current_jacobstahl;
@@ -183,7 +192,17 @@ std::vector<int const *>
 	std::swap(source_chain, main_chain);
 #ifdef DEBUG
 	print_chain("Fused chain", indent, source_chain);
-	std::cout << indent << R"(\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\)" << "\n";
+	std::cout << indent << closing_separator << "\n";
 #endif
 	return source_chain;
+}
+
+static void	print_chain( std::string const &name,
+						std::string const &indent,
+						std::vector<int const *> vec)
+{
+	std::cout << indent << name << ":\n" << indent;
+	for (auto const &e : vec)
+	std::cout << *e << " ";
+	std::cout << std::endl;
 }
