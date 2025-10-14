@@ -13,6 +13,7 @@
 #include "PmergeMe.hpp"
 #include <unordered_map>
 #include <algorithm>
+#include <cinttypes>
 
 /* -------------------------------------------------------------------------- */
 
@@ -124,13 +125,13 @@ std::vector<int const *>
 	using It = decltype(main_chain.begin());
 	size_t		insertions			= 1;		// b1 was already inserted
 	size_t		previous_jacobstahl	= 1;		// b1 insertion corresponds to Jacobstahl 1
-	size_t		current_jacobstahl	= 3;		// Continue to b3 and b2
-	size_t		element_idx			= 0;
-	size_t		elements_to_insert	= 0;
-	size_t		offset				= 0;
-	It			upper_limit			= main_chain.begin();
-	It			pos					= main_chain.begin();
-	int const	*element			= nullptr;
+	size_t		current_jacobstahl	= 3;
+	size_t		pend_idx			= 0;		// pend chain element of element being inserted into main
+	size_t		elements_to_insert	= 0;		// How many elements to insert in a sequence
+	size_t		offset				= 0;		// Element offset to find the limiting element in main (b3, b5, b11...)
+	It			upper_limit			= main_chain.begin();	// Iterator to limiting element
+	It			pos					= main_chain.begin();	// Position for insertion
+	int const	*element			= nullptr;				// Helper to get element from pend
 
 	while (insertions < pend_chain.size()) {	// Insert while there are uninserted elements in the pend chain
 
@@ -140,14 +141,17 @@ std::vector<int const *>
 
 		if (current_jacobstahl <= main_chain.size()) {
 			elements_to_insert	= current_jacobstahl - previous_jacobstahl;
-			element_idx			= current_jacobstahl - 1;
+			pend_idx			= current_jacobstahl - 1;
 		} else {
 			elements_to_insert	= pend_chain.size() - previous_jacobstahl;
-			element_idx			= pend_chain.size() - 1;
+			pend_idx			= pend_chain.size() - 1;
 		}
 
-		offset = insertions + element_idx;
-		upper_limit = main_chain.begin() + offset - 1;
+		offset = insertions + pend_idx;
+		if (offset >= main_chain.size())
+			offset = main_chain.size() - 1;
+		upper_limit = main_chain.begin() + offset;
+		std::cout << "Offset : " << offset << "\n";
 
 		size_t	count = 0;
 		while (count++ < elements_to_insert) {
@@ -159,7 +163,7 @@ std::vector<int const *>
 				<< "	Value: " << **upper_limit << "\n";
 #endif
 
-			element		= pend_chain[element_idx--];
+			element		= pend_chain[pend_idx--];
 			pos = std::upper_bound(main_chain.begin(), upper_limit, element,
 							[](int const *val, int const *elem)
 							{
@@ -168,7 +172,7 @@ std::vector<int const *>
 
 #ifdef DEBUG
 			std::cout
-				<< indent << "Inserting b" << element_idx + 2
+				<< indent << "Inserting b" << pend_idx + 2
 				<< " = " << *element << "\n";
 #endif
 
@@ -180,8 +184,7 @@ std::vector<int const *>
 
 			++insertions;
 			// insertions * 2 -> inserted b1 and b2 -> skip b1, b2, a1 and a2 -> land on a3
-			std::cout << "Offset : " << offset << "\n";
-			upper_limit = main_chain.begin() + offset - 1;
+			upper_limit = main_chain.begin() + offset;
 		}
 
 		size_t	temp = current_jacobstahl;
