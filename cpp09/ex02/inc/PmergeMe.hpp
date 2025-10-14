@@ -10,13 +10,20 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <fstream>
 #include <iostream>
 #include <vector>
+#include <iomanip>
 
-#define DEBUG
 #define C_B_HI_Y	"\033[1;93m\001"
 #define C_B_HI_G	"\033[1;92m\001"
+#define C_B_HI_W	"\033[1;97m\001"
 #define C_RST		"\033[0m\002"
+
+/* -------------------------------------------------------------------------- */
+
+constexpr uint8_t	FW_01 = 10;	// Field width
+constexpr uint8_t	PRINT_LIMIT = 10;
 
 /* -------------------------------------------------------------------------- */
 
@@ -26,18 +33,52 @@ std::vector<int const *>
 /* -------------------------------------------------------------------------- */
 
 template<class T>
+void	limited_print_container(T const &cont, std::string const &str)
+{
+	auto	limit = cont.size();
+	if (limit > PRINT_LIMIT)
+		limit = PRINT_LIMIT;
+	std::cout << std::left << std::setw(FW_01) << str;
+	size_t	count = 0;
+	for (	auto it = cont.cbegin();
+			it != cont.cend() && count < limit;
+			++it, ++count) {
+		std::cout << *it << " ";
+	}
+	if (cont.size() > limit)
+		std::cout << "...";
+	std::cout << std::endl;
+}
+
+template<class T>
+void	print_container(T const &cont, std::string const &str)
+{
+	std::cout << std::left << std::setw(FW_01) << str;
+	for (auto it = cont.cbegin(); it != cont.cend(); ++it)
+		std::cout << *it << " ";
+	std::cout << std::endl;
+}
+
+template<class T>
+void	write_to_file(T const &cont, std::string const &file_name)
+{
+	std::ofstream	ofs(file_name);
+	if (!ofs) {
+		std::cerr << "ERROR: couldn't open output file" << std::endl;
+		return;
+	}
+	for (auto const &e : cont)
+		ofs << e << "\n";
+}
+
+template<class T>
 T	&merge_insertion_sort_vec(T &container)
 {
 	if (container.size() < 2)
 		return container;
 
-#ifdef DEBUG
-	std::cout << "Original container:\n";
-	for (auto const &e : container)
-		std::cout << e << " ";
-	std::cout << "\n";
-#endif
-
+	limited_print_container(container, "Before:");
+	write_to_file(container, "unsorted.txt");
 	// Use vector if integer pointers for recursive sorting
 	std::vector<int const *>	main_chain;
 
@@ -46,6 +87,13 @@ T	&merge_insertion_sort_vec(T &container)
 	}
 
 	vec_pointers_recursion_sort(main_chain);
+
+	T	sorted_container;
+	for (auto const &e : main_chain)
+		sorted_container.insert(sorted_container.end(), *e);
+	std::swap(container, sorted_container);
+	limited_print_container(container, "After:");
+	write_to_file(container, "sorted.txt");
 	return container;
 }
 
