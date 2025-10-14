@@ -14,10 +14,12 @@
 #include <unordered_map>
 #include <algorithm>
 #include <cinttypes>
+#include <iomanip>
 
 /* -------------------------------------------------------------------------- */
 
 constexpr uint8_t	RECURSION_OFFSET = 5;
+constexpr uint8_t	TEXT_WIDTH = 35;
 
 static void	print_chain( std::string const &name,
 				 std::string const &indent,
@@ -109,8 +111,9 @@ std::vector<int const *>
 		pend_chain.push_back(straggler);
 
 #ifdef DEBUG
-	std::cout << indent << "Pend chain (matching main order):\n";
-	std::cout << indent;
+	std::cout
+		<< indent << std::left << std::setw(TEXT_WIDTH)
+		<< "Pend chain (matching main order):";
 	for (auto iptr : pend_chain)
 		std::cout << *iptr << " ";
 	std::cout << "\n";
@@ -204,7 +207,7 @@ static void	print_chain( std::string const &name,
 						std::string const &indent,
 						std::vector<int const *> vec)
 {
-	std::cout << indent << name << ":\n" << indent;
+	std::cout << indent << std::left << std::setw(TEXT_WIDTH) << (name + ":");
 	for (auto const &e : vec)
 	std::cout << *e << " ";
 	std::cout << std::endl;
