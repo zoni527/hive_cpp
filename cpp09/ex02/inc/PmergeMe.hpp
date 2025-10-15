@@ -33,28 +33,39 @@ std::vector<int const *>
 /* -------------------------------------------------------------------------- */
 
 template<class T>
-void	limited_print_container(T const &cont, std::string const &str)
-{
-	auto	limit = cont.size();
-	if (limit > PRINT_LIMIT)
-		limit = PRINT_LIMIT;
-	std::cout << std::left << std::setw(FW_01) << str;
-	size_t	count = 0;
-	for (	auto it = cont.cbegin();
-			it != cont.cend() && count < limit;
-			++it, ++count) {
-		std::cout << *it << " ";
-	}
-	if (cont.size() > limit)
-		std::cout << "...";
-	std::cout << std::endl;
-}
-
-template<class T>
 void	print_container(T const &cont, std::string const &str)
 {
 	std::cout << std::left << std::setw(FW_01) << str;
 	for (auto it = cont.cbegin(); it != cont.cend(); ++it)
+		std::cout << *it << " ";
+	std::cout << std::endl;
+}
+
+template<class T>
+void	limited_print_container(T const &cont, std::string const &str)
+{
+	if (cont.size() <= PRINT_LIMIT) {
+		print_container(cont, str);
+		return;
+	}
+
+	size_t	half	= PRINT_LIMIT / 2;
+	size_t	remain	= half;
+
+	if (PRINT_LIMIT % 2 != 0)
+		++remain;
+
+	std::cout << std::left << std::setw(FW_01) << str;
+	auto	it = cont.cbegin();
+	auto	end = it;
+
+	std::advance(end, half);
+	for (; it != end; ++it) 
+		std::cout << *it << " ";
+	std::cout << "... ";
+	it = cont.begin();
+	std::advance(it, cont.size() - remain);
+	for (; it != cont.end(); ++it) 
 		std::cout << *it << " ";
 	std::cout << std::endl;
 }
@@ -74,9 +85,6 @@ void	write_to_file(T const &cont, std::string const &file_name)
 template<class T>
 T	&merge_insertion_sort_vec(T &container)
 {
-	if (container.size() < 2)
-		return container;
-
 	limited_print_container(container, "Before:");
 	write_to_file(container, "unsorted.txt");
 	// Use vector if integer pointers for recursive sorting

@@ -13,24 +13,22 @@
 #include "PmergeMe.hpp"
 #include <unordered_map>
 #include <algorithm>
-#include <cinttypes>
 
 /* -------------------------------------------------------------------------- */
-
 #ifdef DEBUG
 constexpr uint8_t	RECURSION_INDENT = 8;
-constexpr uint8_t	FW_02 = 33;	// Field width
+constexpr uint8_t	FW_02 = 35;	// Field width
 
 static void	print_chain( std::string const &name,
 				 std::string const &indent,
-				 std::vector<int const *> vec);
+				 std::vector<int const *> &vec);
 #endif
-
 /* -------------------------------------------------------------------------- */
 
 std::vector<int const *>
 &vec_pointers_recursion_sort(std::vector<int const *> &source_chain)
 {
+
 #ifdef DEBUG
 	static size_t	recursion_level = 0;
 
@@ -43,9 +41,9 @@ std::vector<int const *>
 #endif
 
 	if (source_chain.size() <= 1) {
-#ifdef DEBUG
+		#ifdef DEBUG
 		std::cout << indent << closing_separator;
-#endif
+		#endif
 		return source_chain;
 	}
 
@@ -63,16 +61,9 @@ std::vector<int const *>
 	std::vector<int const *>						main_chain;
 	std::unordered_map<int const *, int const *>	pair_map;
 
-#ifdef DEBUG
-		std::cout << indent << std::left << std::setw(FW_02) << "Pairs:";
-#endif
 	for (auto i = source_chain.cbegin(); i != source_chain.cend(); i += 2) {
 		auto	&ptr_1 = *i;
 		auto	&ptr_2 = *(i + 1);
-
-#ifdef DEBUG
-		std::cout << "{" << *ptr_1 << ", " << *ptr_2 << "} ";
-#endif
 
 		if (*ptr_2 < *ptr_1) {
 			main_chain.push_back(ptr_1);	// Larger element goes to main
@@ -82,14 +73,18 @@ std::vector<int const *>
 			pair_map.emplace(ptr_2, ptr_1);
 		}
 	}
-#ifdef DEBUG
-		std::cout << "\n";
-#endif
+
+	#ifdef DEBUG
+	std::cout << indent << std::left << std::setw(FW_02) << "Sorted pairs:";
+	for (auto it = main_chain.cbegin(); it != main_chain.cend(); ++it)
+		std::cout << "{" << *pair_map.at(*it) << ", " << **it << "} ";
+	std::cout << "\n";
+	#endif
 
 	if (not_even)
 		source_chain.push_back(straggler);
 
-#ifdef DEBUG
+	#ifdef DEBUG
 	print_chain("Main (unsorted)", indent, main_chain);
 	std::cout << indent << std::left << std::setw(FW_02) << "Pend (unsorted):";
 	for (auto const &e : main_chain)
@@ -97,57 +92,53 @@ std::vector<int const *>
 	if (not_even)
 		std::cout << *straggler;
 	std::cout << "\n";
-#endif
+	#endif
 
 	vec_pointers_recursion_sort(main_chain);
 
-#ifdef DEBUG
+	#ifdef DEBUG
 	print_chain("Main (sorted)", indent, main_chain);
-#endif
+	#endif
 
 	std::vector<int const *>	pend_chain;
+
 	for (auto it = main_chain.cbegin(); it != main_chain.cend(); ++it)
 		pend_chain.push_back(pair_map.at(*it));
 	if (not_even)
 		pend_chain.push_back(straggler);
 
-#ifdef DEBUG
-	std::cout
-		<< indent << std::left << std::setw(FW_02)
-		<< "Pend (matching main order):";
+	#ifdef DEBUG
+	std::cout	<< indent << std::left << std::setw(FW_02)
+				<< "Pend (matching main order):";
 	for (auto iptr : pend_chain)
 		std::cout << *iptr << " ";
 	std::cout << "\n";
-#endif
+	#endif
 
 	// Put b1 before a1
 	main_chain.insert(main_chain.cbegin(), pend_chain.front());
-#ifdef DEBUG
+
+	#ifdef DEBUG
 	print_chain("Main with b1 inserted", indent, main_chain);
-#endif
+	#endif
 
 	using It = decltype(main_chain.cbegin());
 	size_t		insertions	= 1;	// b1 was already inserted
 	size_t		prev_jsthal	= 1;	// b1 insertion corresponds to Jacobsthal 1
-	size_t		curr_jsthal	= 3;
+	size_t		curr_jsthal	= 3;	// 3 = 1 + 2 * 1
 	size_t		pend_idx	= 0;	// pend element of element being inserted into main
 	size_t		to_insert	= 0;	// How many elements to insert in a sequence
-	size_t		offset		= 0;	// Element offset to find the limiting element in main (b3, b5, b11...)
-	It			upper_limit	= main_chain.cbegin();	// Iterator to limiting element
-	It			pos			= main_chain.cbegin();	// Position for insertion
-	int const	*element	= nullptr;				// Helper to get element from pend
-	auto		comp		=	[](int const *val, int const *elem)	// Comparison function to dereference pointers
-								{
+	size_t		offset		= 0;	// Element offset to find the limiting element in main (a3, a5, a11...)
+	auto		comp		=	[](int const *val, int const *elem) {	// Comparison function for binary sort
 									return (*val < *elem);
 								};
 
 	while (insertions < pend_chain.size()) {	// Insert while there are uninserted elements in the pend
 
-#ifdef DEBUG
-		std::cout
-			<< indent << C_B_HI_W << std::left << std::setw(FW_02)
-			<< "curr Jacobsthal: " << curr_jsthal << C_RST << "\n";
-#endif
+		#ifdef DEBUG
+		std::cout	<< indent << C_B_HI_W << std::left << std::setw(FW_02)
+					<< "Current Jacobsthal: " << curr_jsthal << C_RST << "\n";
+		#endif
 
 		if (curr_jsthal <= pend_chain.size()) {
 			to_insert	= curr_jsthal - prev_jsthal;
@@ -160,41 +151,36 @@ std::vector<int const *>
 		offset = insertions + pend_idx;
 		if (offset > main_chain.size())
 			offset = main_chain.size();
-		upper_limit = main_chain.cbegin() + offset;
 
 		while (to_insert--) {
-			element		= pend_chain.at(pend_idx--);
-			pos = std::upper_bound(main_chain.cbegin(), upper_limit, element, comp);
+			auto element	= pend_chain[pend_idx--];
+			auto begin		= main_chain.cbegin();
+			auto limit		= begin + offset;
+			auto pos		= std::upper_bound(begin, limit, element, comp);
 
-#ifdef DEBUG
-			std::cout
-				<< indent << "Inserting b" << pend_idx + 2
-				<< " = " << *element << " before ";
-			if (pos >= main_chain.end()) {
+			#ifdef DEBUG
+			auto	ab_output_helper = [&main_chain](It const &it) {
+				std::cout << "ab" << std::distance(main_chain.cbegin(), it) + 1
+				<< " = " << **it << "\n"; };
+			std::cout	<< indent << "Inserting b" << pend_idx + 2
+						<< " = " << *element << " before ";
+			if (pos >= main_chain.cend())
 				std::cout << "end()\n";
-			} else {
-				std::cout << "ab" << std::distance(main_chain.cbegin(), pos) + 1
-				<< " = " << **pos << "\n";
-			}
+			else
+				ab_output_helper(pos);
 			std::cout << indent << "Limiting element ";
-			if (upper_limit >= main_chain.end()) {
+			if (limit >= main_chain.cend())
 				std::cout << "end()\n";
-			} else {
-				std::cout
-					<< "ab" << std::distance(main_chain.cbegin(), upper_limit) + 1
-					<< " = " << **upper_limit << "\n";
-			}
-#endif
+			else
+				ab_output_helper(limit);
+			#endif
 
 			main_chain.insert(pos, element);
-
-#ifdef DEBUG
-			print_chain("Partial fused", indent, main_chain);
-#endif
-
 			++insertions;
-			// insertions * 2 -> inserted b1 and b2 -> skip b1, b2, a1 and a2 -> land on a3
-			upper_limit = main_chain.cbegin() + offset;
+
+			#ifdef DEBUG
+			print_chain("Partial fused", indent, main_chain);
+			#endif
 		}
 
 		size_t	temp = curr_jsthal;
@@ -203,17 +189,19 @@ std::vector<int const *>
 		prev_jsthal = temp;
 	}
 	std::swap(source_chain, main_chain);
-#ifdef DEBUG
+
+	#ifdef DEBUG
 	print_chain("Fused", indent, source_chain);
 	std::cout << indent << closing_separator;
-#endif
+	#endif
+
 	return source_chain;
 }
-
+/* -------------------------------------------------------------------------- */
 #ifdef DEBUG
 static void	print_chain( std::string const &name,
 						std::string const &indent,
-						std::vector<int const *> vec)
+						std::vector<int const *> &vec)
 {
 	std::cout << indent << std::left << std::setw(FW_02) << (name + ":");
 	for (auto const &e : vec)

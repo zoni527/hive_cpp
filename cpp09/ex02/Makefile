@@ -46,9 +46,9 @@ fclean: clean
 
 re: fclean all
 # ---------------------------------------------------------------------------- #
-UPPER_LIMIT	?= 1000
-LOWER_LIMIT	?= -1000
-AMOUNT		?= 100
+UPPER_LIMIT	?= 99
+LOWER_LIMIT	?= 0
+AMOUNT		?= 10
 
 run: $(NAME)
 	@./$(NAME) `seq $(LOWER_LIMIT) $(UPPER_LIMIT)\

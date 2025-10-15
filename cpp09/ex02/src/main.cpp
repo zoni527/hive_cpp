@@ -11,14 +11,11 @@
 /* ************************************************************************** */
 
 #include "PmergeMe.hpp"
-#include <cstdint>
-#include <vector>
 #include <list>
 #include <sstream>
 
 int	main(int argc, char *argv[])
 {
-	std::vector<int>	numbers = {7, 3, 6, 4, 1, 2, 5, 9, 8, 9, 1};
 	std::list<int>		nums;
 
 	if (argc < 2) {
@@ -38,11 +35,13 @@ int	main(int argc, char *argv[])
 				nums.push_back(num);
 		}
 	}
-	if (nums.size() == 0)
-	{
+
+	if (nums.size() == 0) {
 		std::cerr << "ERROR: bad input" << std::endl;
 		return 1;
 	}
+
 	merge_insertion_sort_vec<std::list<int>>(nums);
+
 	return 0;
 }
