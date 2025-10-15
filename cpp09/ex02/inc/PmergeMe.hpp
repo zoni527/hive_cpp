@@ -6,7 +6,7 @@
 /*   By: jvarila <jvarila@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/07 11:34:56 by jvarila           #+#    #+#             */
-/*   Updated: 2025/10/13 16:48:00 by jvarila          ###   ########.fr       */
+/*   Updated: 2025/10/15 17:19:39 by jvarila          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <iostream>
 #include <vector>
 #include <iomanip>
+#include <chrono>
 
 #define C_B_HI_Y	"\033[1;93m\001"
 #define C_B_HI_G	"\033[1;92m\001"
@@ -94,13 +95,21 @@ T	&merge_insertion_sort_vec(T &container)
 		main_chain.push_back(&e);
 	}
 
+	auto const start = std::chrono::high_resolution_clock::now();
 	vec_pointers_recursion_sort(main_chain);
+	auto const stop = std::chrono::high_resolution_clock::now();
 
 	T	sorted_container;
 	for (auto const &e : main_chain)
 		sorted_container.insert(sorted_container.end(), *e);
 	std::swap(container, sorted_container);
 	limited_print_container(container, "After:");
+
+	std::chrono::duration<double>	elapsed = stop - start;
+	std::cout
+		<< "Time to process range of " << sorted_container.size()
+		<< " elements with std::vector : " << elapsed.count() * 1000000 << " us\n";
+
 	write_to_file(container, "sorted.txt");
 	return container;
 }

@@ -6,7 +6,7 @@
 /*   By: jvarila <jvarila@student.hive.fi>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/13 16:45:52 by jvarila           #+#    #+#             */
-/*   Updated: 2025/10/13 19:15:05 by jvarila          ###   ########.fr       */
+/*   Updated: 2025/10/15 17:04:41 by jvarila          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,6 @@ std::vector<int const *>
 	print_chain("Main with b1 inserted", indent, main_chain);
 	#endif
 
-	using It = decltype(main_chain.cbegin());
 	size_t		insertions	= 1;	// b1 was already inserted
 	size_t		prev_jsthal	= 1;	// b1 insertion corresponds to Jacobsthal 1
 	size_t		curr_jsthal	= 3;	// 3 = 1 + 2 * 1
@@ -159,7 +158,7 @@ std::vector<int const *>
 			auto pos		= std::upper_bound(begin, limit, element, comp);
 
 			#ifdef DEBUG
-			auto	ab_output_helper = [&main_chain](It const &it) {
+			auto	ab_output_helper = [&main_chain](decltype(main_chain.cbegin()) &it) {
 				std::cout << "ab" << std::distance(main_chain.cbegin(), it) + 1
 				<< " = " << **it << "\n"; };
 			std::cout	<< indent << "Inserting b" << pend_idx + 2

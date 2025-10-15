@@ -6,7 +6,7 @@
 #    By: jvarila <jvarila@student.hive.fi>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/05/22 12:04:28 by jvarila           #+#    #+#              #
-#    Updated: 2025/10/13 16:48:23 by jvarila          ###   ########.fr        #
+#    Updated: 2025/10/15 16:56:26 by jvarila          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -46,9 +46,9 @@ fclean: clean
 
 re: fclean all
 # ---------------------------------------------------------------------------- #
-UPPER_LIMIT	?= 99
-LOWER_LIMIT	?= 0
-AMOUNT		?= 10
+UPPER_LIMIT	?= 999
+LOWER_LIMIT	?= 1
+AMOUNT		?= 100
 
 run: $(NAME)
 	@./$(NAME) `seq $(LOWER_LIMIT) $(UPPER_LIMIT)\
