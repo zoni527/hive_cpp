@@ -26,7 +26,7 @@ static void	print_chain( std::string const &name,
 /* -------------------------------------------------------------------------- */
 
 std::vector<int const *>
-&vec_of_pointers_recursion_sort(std::vector<int const *> &source_chain)
+&vector_of_pointers_recursion_sort(std::vector<int const *> &source_chain)
 {
 	#ifdef DEBUG
 	static size_t	recursion_level = 0;
@@ -94,7 +94,7 @@ std::vector<int const *>
 	std::cout << "\n";
 	#endif
 
-	vec_of_pointers_recursion_sort(main_chain);
+	vector_of_pointers_recursion_sort(main_chain);
 
 	#ifdef DEBUG
 	print_chain("Main (sorted)", indent, main_chain);
@@ -179,7 +179,8 @@ std::vector<int const *>
 			++insertions;
 
 			#ifdef DEBUG
-			print_chain("Partial fused", indent, main_chain);
+			if (main_chain.size() != source_chain.size())
+			print_chain("Partially fused", indent, main_chain);
 			#endif
 		}
 
@@ -191,7 +192,7 @@ std::vector<int const *>
 	std::swap(source_chain, main_chain);
 
 	#ifdef DEBUG
-	print_chain("Fused", indent, source_chain);
+	print_chain("Fully fused", indent, source_chain);
 	std::cout << indent << closing_separator;
 	#endif
 

@@ -31,7 +31,7 @@ constexpr uint8_t	PRINT_LIMIT = 10;
 /* -------------------------------------------------------------------------- */
 
 std::vector<int const *>
-&vec_of_pointers_recursion_sort(std::vector<int const *> &main_chain);
+&vector_of_pointers_recursion_sort(std::vector<int const *> &main_chain);
 
 std::deque<int const *>
 &deque_of_pointers_recursion_sort(std::deque<int const *> &source_chain);
@@ -72,12 +72,12 @@ void	limited_print_container(T const &cont, std::string const &str)
 	auto	end = it;
 
 	std::advance(end, half);
-	for (; it != end; ++it) 
+	for (; it != end; ++it)
 		std::cout << *it << " ";
 	std::cout << "... ";
 	it = cont.begin();
 	std::advance(it, cont.size() - remain);
-	for (; it != cont.end(); ++it) 
+	for (; it != cont.end(); ++it)
 		std::cout << *it << " ";
 	std::cout << std::endl;
 }
@@ -97,27 +97,46 @@ void	write_to_file(T const &cont, std::string const &file_name)
 template<class T>
 T	&merge_insertion_sort(T &container)
 {
-	std::vector<int const *>	main_chain;
+	std::vector<int const *>	vector_chain;
+	std::deque<int const *>		deque_chain;
+	std::list<int const *>		list_chain;
 
 	for (auto const &e : container) {
-		main_chain.push_back(&e);
+		vector_chain.push_back(&e);
+		deque_chain.push_back(&e);
+		list_chain.push_back(&e);
 	}
 
-	auto const start = std::chrono::high_resolution_clock::now();
-	vec_of_pointers_recursion_sort(main_chain);
-	auto const stop = std::chrono::high_resolution_clock::now();
+	auto start	= std::chrono::high_resolution_clock::now();
+	vector_of_pointers_recursion_sort(vector_chain);
+	auto stop	= std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double>	vector_seconds = stop - start;
+	auto							vector_microseconds = vector_seconds * 1000000;
+
+	start	= std::chrono::high_resolution_clock::now();
+	deque_of_pointers_recursion_sort(deque_chain);
+	stop	= std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double>	deque_seconds = stop - start;
+	auto							deque_microseconds = deque_seconds * 1000000;
+
+	start	= std::chrono::high_resolution_clock::now();
+	list_of_pointers_recursion_sort(list_chain);
+	stop	= std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double>	list_seconds = stop - start;
+	auto							list_microseconds = list_seconds * 1000000;
 
 	T	sorted_container;
-	for (auto const &e : main_chain)
+	for (auto const &e : deque_chain)
 		sorted_container.insert(sorted_container.end(), *e);
 	std::swap(container, sorted_container);
 	limited_print_container(container, "After:");
 
-	std::chrono::duration<double>	elapsed = stop - start;
-	auto							microseconds = elapsed * 1000000;
-
 	std::cout	<< "Time to process range of " << sorted_container.size()
-				<< " elements with std::vector : " << microseconds.count() << " us\n";
+				<< " elements with std::vector : " << vector_microseconds.count() << " us\n";
+	std::cout	<< "Time to process range of " << sorted_container.size()
+				<< " elements with std::deque  : " << deque_microseconds.count() << " us\n";
+	std::cout	<< "Time to process range of " << sorted_container.size()
+				<< " elements with std::list   : " << list_microseconds.count() << " us\n";
 
 	write_to_file(container, "sorted.txt");
 	return container;
@@ -136,44 +155,3 @@ Input &merge_insertion_sort_generic(Input &input)
 
 	return input;
 }
-
-/**
- * 0  1  2  3  4  5  ...
- * a1 a2 a3 a4 a5 a6 ...
- * b1 b2 b3 b4 b5 b6 ...
- *
- * Jacobsthal number:		3
- * Limiting element:		a3
- * Limiting element index:	2 = Jacobsthal number - 2 + 1
- *
- * Insertion of b1 ->
- *
- * v
- * 0  1  2  3  4  5  6  ...
- * b1 a1 a2 a3 a4 a5 a6 ...
- *          ^
- *
- * Limiting element index:	3 = Jacobsthal number - 2 + 2
- *
- * Insertion of b3 ->
- *
- *    v
- * 0  1  2  3  4  5  6  7  8  9...
- * b1 b3 a1 a2 a3 a4 a5 a6 a7 a8...
- *             ^
- * Limiting element index:	4 = Jacobsthal number - 2 + 3
- *
- * Insertion of b2 ->
- *
- *          v
- * 0  1  2  3  4  5  6  7  8  9  10...
- * b1 b3 a1 b2 a2 a3 a4 a5 a6 a7 a8...
- *                ^
- *
- * Jacobsthal number:		5
- * Limiting element:		a5
- * Limiting element index:	7 = Jacobsthal number - 2 + 4
- *
- * 0  1  2  3  4  5  6  7  8  9...
- * b1 b3 a1 b2 a2 a3 a4 a5 a6 a7 a8...
- */
