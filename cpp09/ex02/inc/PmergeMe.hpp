@@ -12,9 +12,11 @@
 
 #include <fstream>
 #include <iostream>
-#include <vector>
 #include <iomanip>
 #include <chrono>
+#include <vector>
+#include <deque>
+#include <list>
 
 #define C_B_HI_Y	"\033[1;93m\001"
 #define C_B_HI_G	"\033[1;92m\001"
@@ -23,13 +25,22 @@
 
 /* -------------------------------------------------------------------------- */
 
-constexpr uint8_t	FW_01 = 10;	// Field width
+constexpr uint8_t	FW_01 = 10;	// FW = Field width
 constexpr uint8_t	PRINT_LIMIT = 10;
 
 /* -------------------------------------------------------------------------- */
 
 std::vector<int const *>
-&vec_pointers_recursion_sort(std::vector<int const *> &main_chain);
+&vec_of_pointers_recursion_sort(std::vector<int const *> &main_chain);
+
+std::deque<int const *>
+&deque_of_pointers_recursion_sort(std::deque<int const *> &source_chain);
+
+std::list<int const *>
+&list_of_pointers_recursion_sort(std::list<int const *> &source_chain);
+
+template<class Input, class Calc>
+Input	&merge_insertion_sort_generic(Input &input);
 
 /* -------------------------------------------------------------------------- */
 
@@ -84,11 +95,8 @@ void	write_to_file(T const &cont, std::string const &file_name)
 }
 
 template<class T>
-T	&merge_insertion_sort_vec(T &container)
+T	&merge_insertion_sort(T &container)
 {
-	limited_print_container(container, "Before:");
-	write_to_file(container, "unsorted.txt");
-	// Use vector if integer pointers for recursive sorting
 	std::vector<int const *>	main_chain;
 
 	for (auto const &e : container) {
@@ -96,7 +104,7 @@ T	&merge_insertion_sort_vec(T &container)
 	}
 
 	auto const start = std::chrono::high_resolution_clock::now();
-	vec_pointers_recursion_sort(main_chain);
+	vec_of_pointers_recursion_sort(main_chain);
 	auto const stop = std::chrono::high_resolution_clock::now();
 
 	T	sorted_container;
@@ -106,12 +114,27 @@ T	&merge_insertion_sort_vec(T &container)
 	limited_print_container(container, "After:");
 
 	std::chrono::duration<double>	elapsed = stop - start;
-	std::cout
-		<< "Time to process range of " << sorted_container.size()
-		<< " elements with std::vector : " << elapsed.count() * 1000000 << " us\n";
+	auto							microseconds = elapsed * 1000000;
+
+	std::cout	<< "Time to process range of " << sorted_container.size()
+				<< " elements with std::vector : " << microseconds.count() << " us\n";
 
 	write_to_file(container, "sorted.txt");
 	return container;
+}
+
+template<class Input, class Calc>
+Input &merge_insertion_sort_generic(Input &input)
+{
+	Calc	cont(input.cbegin(), input.cend());
+
+	for (auto const &e : cont)
+		std::cout << e << " ";
+	std::cout << std::endl;
+
+	(void)cont;
+
+	return input;
 }
 
 /**

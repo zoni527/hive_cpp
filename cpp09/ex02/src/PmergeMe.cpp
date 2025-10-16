@@ -26,10 +26,9 @@ static void	print_chain( std::string const &name,
 /* -------------------------------------------------------------------------- */
 
 std::vector<int const *>
-&vec_pointers_recursion_sort(std::vector<int const *> &source_chain)
+&vec_of_pointers_recursion_sort(std::vector<int const *> &source_chain)
 {
-
-#ifdef DEBUG
+	#ifdef DEBUG
 	static size_t	recursion_level = 0;
 
 	++recursion_level;
@@ -38,7 +37,7 @@ std::vector<int const *>
 	std::string	closing_separator(C_B_HI_G R"(\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\)""\n" C_RST);
 	std::cout << indent << opening_separator;
 	print_chain("Source", indent, source_chain);
-#endif
+	#endif
 
 	if (source_chain.size() <= 1) {
 		#ifdef DEBUG
@@ -61,6 +60,7 @@ std::vector<int const *>
 	std::vector<int const *>						main_chain;
 	std::unordered_map<int const *, int const *>	pair_map;
 
+	main_chain.reserve(source_chain.size());
 	for (auto i = source_chain.cbegin(); i != source_chain.cend(); i += 2) {
 		auto	&ptr_1 = *i;
 		auto	&ptr_2 = *(i + 1);
@@ -94,7 +94,7 @@ std::vector<int const *>
 	std::cout << "\n";
 	#endif
 
-	vec_pointers_recursion_sort(main_chain);
+	vec_of_pointers_recursion_sort(main_chain);
 
 	#ifdef DEBUG
 	print_chain("Main (sorted)", indent, main_chain);
@@ -102,6 +102,7 @@ std::vector<int const *>
 
 	std::vector<int const *>	pend_chain;
 
+	pend_chain.reserve(source_chain.size() / 2 + 1);
 	for (auto it = main_chain.cbegin(); it != main_chain.cend(); ++it)
 		pend_chain.push_back(pair_map.at(*it));
 	if (not_even)
@@ -193,6 +194,176 @@ std::vector<int const *>
 	print_chain("Fused", indent, source_chain);
 	std::cout << indent << closing_separator;
 	#endif
+
+	return source_chain;
+}
+
+std::deque<int const *>
+&deque_of_pointers_recursion_sort(std::deque<int const *> &source_chain)
+{
+	if (source_chain.size() <= 1) {
+		return source_chain;
+	}
+
+	auto	straggler	= source_chain.back();
+	bool	not_even	= (source_chain.size() % 2 != 0);
+
+	if (not_even)
+		source_chain.pop_back();
+
+	std::deque<int const *>							main_chain;
+	std::unordered_map<int const *, int const *>	pair_map;
+
+	for (auto i = source_chain.cbegin(); i != source_chain.cend(); i += 2) {
+		auto	&ptr_1 = *i;
+		auto	&ptr_2 = *(i + 1);
+
+		if (*ptr_2 < *ptr_1) {
+			main_chain.push_back(ptr_1);
+			pair_map.emplace(ptr_1, ptr_2);
+		} else {
+			main_chain.push_back(ptr_2);
+			pair_map.emplace(ptr_2, ptr_1);
+		}
+	}
+
+	if (not_even)
+		source_chain.push_back(straggler);
+
+	deque_of_pointers_recursion_sort(main_chain);
+
+	std::deque<int const *>	pend_chain;
+	for (auto it = main_chain.cbegin(); it != main_chain.cend(); ++it)
+		pend_chain.push_back(pair_map.at(*it));
+	if (not_even)
+		pend_chain.push_back(straggler);
+
+	main_chain.insert(main_chain.cbegin(), pend_chain.front());
+
+	size_t		insertions	= 1;
+	size_t		prev_jsthal	= 1;
+	size_t		curr_jsthal	= 3;
+	size_t		pend_idx	= 0;
+	size_t		to_insert	= 0;
+	size_t		offset		= 0;
+	auto		comp		=	[](int const *val, int const *elem) {
+									return (*val < *elem);
+								};
+
+	while (insertions < pend_chain.size()) {
+		if (curr_jsthal <= pend_chain.size()) {
+			to_insert	= curr_jsthal - prev_jsthal;
+			pend_idx	= curr_jsthal - 1;
+		} else {
+			to_insert	= pend_chain.size() - prev_jsthal;
+			pend_idx	= pend_chain.size() - 1;
+		}
+
+		offset = insertions + pend_idx;
+		if (offset > main_chain.size())
+			offset = main_chain.size();
+
+		while (to_insert--) {
+			auto element	= pend_chain[pend_idx--];
+			auto begin		= main_chain.cbegin();
+			auto limit		= begin + offset;
+			auto pos		= std::upper_bound(begin, limit, element, comp);
+
+			main_chain.insert(pos, element);
+			++insertions;
+		}
+
+		size_t	temp = curr_jsthal;
+
+		curr_jsthal += 2 * prev_jsthal;
+		prev_jsthal = temp;
+	}
+	std::swap(source_chain, main_chain);
+
+	return source_chain;
+}
+
+std::list<int const *>
+&list_of_pointers_recursion_sort(std::list<int const *> &source_chain)
+{
+	if (source_chain.size() <= 1) {
+		return source_chain;
+	}
+
+	auto	straggler	= source_chain.back();
+	bool	not_even	= (source_chain.size() % 2 != 0);
+
+	if (not_even)
+		source_chain.pop_back();
+
+	std::list<int const *>							main_chain;
+	std::unordered_map<int const *, int const *>	pair_map;
+
+	for (auto i = source_chain.cbegin(); i != source_chain.cend(); std::advance(i, 2)) {
+		auto	&ptr_1 = *i;
+		auto	&ptr_2 = *std::next(i);
+
+		if (*ptr_2 < *ptr_1) {
+			main_chain.push_back(ptr_1);
+			pair_map.emplace(ptr_1, ptr_2);
+		} else {
+			main_chain.push_back(ptr_2);
+			pair_map.emplace(ptr_2, ptr_1);
+		}
+	}
+
+	if (not_even)
+		source_chain.push_back(straggler);
+
+	list_of_pointers_recursion_sort(main_chain);
+
+	std::list<int const *>	pend_chain;
+	for (auto it = main_chain.cbegin(); it != main_chain.cend(); ++it)
+		pend_chain.push_back(pair_map.at(*it));
+	if (not_even)
+		pend_chain.push_back(straggler);
+
+	main_chain.insert(main_chain.cbegin(), pend_chain.front());
+
+	size_t		insertions	= 1;
+	size_t		prev_jsthal	= 1;
+	size_t		curr_jsthal	= 3;
+	size_t		pend_idx	= 0;
+	size_t		to_insert	= 0;
+	size_t		offset		= 0;
+	auto		comp		=	[](int const *val, int const *elem) {
+									return (*val < *elem);
+								};
+
+	while (insertions < pend_chain.size()) {
+		if (curr_jsthal <= pend_chain.size()) {
+			to_insert	= curr_jsthal - prev_jsthal;
+			pend_idx	= curr_jsthal - 1;
+		} else {
+			to_insert	= pend_chain.size() - prev_jsthal;
+			pend_idx	= pend_chain.size() - 1;
+		}
+
+		offset = insertions + pend_idx;
+		if (offset > main_chain.size())
+			offset = main_chain.size();
+
+		while (to_insert--) {
+			auto element	= *std::next(pend_chain.begin(), pend_idx--);
+			auto begin		= main_chain.cbegin();
+			auto limit		= std::next(begin, offset);
+			auto pos		= std::upper_bound(begin, limit, element, comp);
+
+			main_chain.insert(pos, element);
+			++insertions;
+		}
+
+		size_t	temp = curr_jsthal;
+
+		curr_jsthal += 2 * prev_jsthal;
+		prev_jsthal = temp;
+	}
+	std::swap(source_chain, main_chain);
 
 	return source_chain;
 }

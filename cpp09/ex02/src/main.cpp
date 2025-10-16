@@ -49,7 +49,9 @@ int	main(int argc, char *argv[])
 		}
 	}
 
-	merge_insertion_sort_vec<std::list<int>>(numbers);
+	limited_print_container(numbers, "Before:");
+	write_to_file(numbers, "unsorted.txt");
+	merge_insertion_sort<std::list<int>>(numbers);
 
 	return 0;
 }
